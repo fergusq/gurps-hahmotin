@@ -58,6 +58,8 @@
       (inc i)
       i)))
 
+(declare get-value)
+
 (defn scale [character default attr cost]
   (let [def (if (keyword? default)
               (get-value character default)

@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [clojure.zip :as zip]))
 
-(def skills-xml (xml/parse "resources/home/iikka/Lataukset/gcs-4.11.1/Library/Skills/Basic Set.skl"))
+(def skills-xml (xml/parse "resources/Basic Set.skl"))
 
 (defn xml->map [tags updater xml-element]
   (->> (:content xml-element)

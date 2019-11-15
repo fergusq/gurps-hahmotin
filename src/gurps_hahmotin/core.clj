@@ -2,7 +2,8 @@
   (:require [clojure.xml :as xml]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.zip :as zip]))
+            [clojure.zip :as zip]
+            [selmer.parser :as selmer]))
 
 (def skills-xml (xml/parse "resources/Basic Set.skl"))
 
@@ -52,6 +53,7 @@
     1 1
     0))
 
+; FIXME
 (defn round [f]
   (let [i (int (Math/floor f))]
     (if (< i 0)
@@ -64,8 +66,8 @@
   (let [def (if (keyword? default)
               (get-value character default)
               default)]
-    (+ (round def) (round (/ (get character attr 0)
-                             cost)))))
+    (+ (round def) (quot (get character attr 0)
+                         cost))))
 
 (defmulti get-value (fn [_ id] id))
 
@@ -93,6 +95,12 @@
 (defmethod get-value :MaxFP [c _]
   (scale c :HT :MaxFP 2))
 
+(defmethod get-value :MaxHP3 [c _]
+  (quot (get-value c :MaxHP) 3))
+
+(defmethod get-value :MaxFP3 [c _]
+  (quot (get-value c :MaxFP) 3))
+
 (defmethod get-value :Initiative [c _]
   (scale c :Per :Initiative 2))
 
@@ -109,7 +117,7 @@
   (scale c :Speed :BM 5))
 
 (defmethod get-value :Lift [c _]
-  (let [liftingST (+ (get-value c :ST) (round (/ (:Lift c)
+  (let [liftingST (+ (get-value c :ST) (round (/ (get c :Lift 0)
                                                  3)))]
     (round (/ (* liftingST liftingST)
               5))))
@@ -122,3 +130,20 @@
       (+ (get-value character (:base skill))
          (:modifier skill)
          (scale-points points)))))
+
+(def sheet-file "resources/character-sheet/character_form_v3.2.html")
+
+(def sheet (slurp sheet-file))
+
+(def required-values #{:Per :Will
+                       :MaxHP :MaxFP :MaxHP3 :MaxFP3
+                       :Initiative :Speed
+                       :BM :Lift})
+
+(defn render-character-sheet [character]
+  (->> (clojure.set/union (->> character :UsedCP keys set) required-values)
+       (reduce #(-> %1
+                    (assoc %2 (get-value (:UsedCP character) %2))
+                    (assoc (keyword (str (name %2) "CP")) (get (:UsedCP character) %2 0)))
+               {:css "resources/character-sheet/character_form_v3.2.css"})
+       (selmer/render sheet)))

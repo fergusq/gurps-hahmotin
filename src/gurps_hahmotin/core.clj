@@ -122,6 +122,32 @@
     (round (/ (* liftingST liftingST)
               5))))
 
+(defmethod get-value :Thrust [c _]
+  (let [ST (get-value c :ST)]
+    (condp <= ST
+      17 "1d+2"
+      15 "1d+1"
+      13 "1d"
+      11 "1d-1"
+      9 "1d-2"
+      7 "1d-3"
+      "1d-4")))
+
+(defmethod get-value :Swing [c _]
+  (let [ST (get-value c :ST)]
+    (condp <= ST
+      17 "5d-1"
+      16 "2d+2"
+      15 "2d+1"
+      14 "2d"
+      13 "2d-1"
+      12 "1d+2"
+      11 "1d+1"
+      10 "1d"
+      9 "1d-1"
+      8 "1d-2"
+      "1d-3")))
+
 (defmethod get-value :default [character skill-name]
   (let [points (get character skill-name 0)
         skill (skill-name skills)]
@@ -138,12 +164,35 @@
 (def required-values #{:Per :Will
                        :MaxHP :MaxFP :MaxHP3 :MaxFP3
                        :Initiative :Speed
-                       :BM :Lift})
+                       :BM :Lift
+                       :Swing
+                       :Thrust})
+
+(defn add-cp-to-context-map [character context-map kw]
+  (let [used-CP (:used-CP character)
+        value (get-value used-CP kw)
+        context-map' (-> context-map
+                         (assoc kw value)
+                         (assoc (keyword (str (name kw) "CP")) (kw used-CP)))
+        skill-count (:skill-count context-map)]
+    (if (contains? skills kw)
+      (-> context-map'
+          (update :skill-count inc)
+          (assoc-in [:skills skill-count] (-> (kw skills)
+                                              (assoc :value value)
+                                              (assoc :CP (kw used-CP)))))
+      context-map')))
+      
+(defn create-context-map [character]
+  (->> (clojure.set/union (->> character :used-CP keys set) required-values)
+       (vec)
+       (sort)
+       (reduce (partial add-cp-to-context-map character)
+               {:css "resources/character-sheet/character_form_v3.2.css"
+                :skill-count 0
+                :TotalCP (apply + (vals (:used-CP character)))
+                :UnusedCP (apply - 150 (vals (:used-CP character)))})))
 
 (defn render-character-sheet [character]
-  (->> (clojure.set/union (->> character :UsedCP keys set) required-values)
-       (reduce #(-> %1
-                    (assoc %2 (get-value (:UsedCP character) %2))
-                    (assoc (keyword (str (name %2) "CP")) (get (:UsedCP character) %2 0)))
-               {:css "resources/character-sheet/character_form_v3.2.css"})
+  (->> (create-context-map character)
        (selmer/render sheet)))

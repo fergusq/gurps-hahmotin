@@ -35,8 +35,11 @@ table {
 
 td,
 th {
-    vertical-align: top;
     font-size: 12pt;
+}
+
+.Table5 td {
+    vertical-align: top;
 }
 
 h1,
@@ -1114,10 +1117,10 @@ span.heading_numbering {
 }
 
 .P21 {
-    font-size: 6pt;
+    font-size: 7pt;
     font-family: NanumGothic;
     writing-mode: page;
-    text-align: left ! important;
+    text-align: center ! important;
 }
 
 .P22 {
@@ -1154,10 +1157,10 @@ span.heading_numbering {
 }
 
 .P27 {
-    font-size: 6pt;
+    font-size: 9pt;
     font-family: NanumGothic;
     writing-mode: page;
-    text-align: left ! important;
+    text-align: center ! important;
 }
 
 .P28 {
@@ -1205,6 +1208,10 @@ span.heading_numbering {
     writing-mode: page;
     text-align: center ! important;
     font-weight: normal;
+}
+
+.P33b {
+    font-size: 20pt !important;
 }
 
 .P34 {

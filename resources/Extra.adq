@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="US-ASCII" ?>
+<advantage_list version="1">
+	<advantage version="2">
+		<name>Social Stigma (Savage)</name>
+		<type>Social</type>
+		<base_points>-10</base_points>
+		<reference></reference>
+		<categories>
+			<category>Disadvantage</category>
+		</categories>
+	</advantage>
+</advantage_list>

@@ -86,7 +86,7 @@
                          :MaxHP 2
                          :BM 5
                          :NightVision 3
-                         [:SocialStigma "Second-Class Citizen"] -5}
+                         :SocialStigmaSecond-ClassCitizen -5}
                :optional-CP [[{:BadTemper -5}
                               {:Impulsiveness -5}
                               {:Bloodlust -5}
@@ -98,7 +98,7 @@
                           :IQ -20
                           :HT 10
                           :NightVision 3
-                          [:SocialStigma "Savage"] -10
+                          :SocialStigmaSavage -10
                           :DamageResistance 3
                           :Fearlessness 2
                           [:Appearance "Ugly"] -8}})
@@ -112,7 +112,7 @@
                        :RapidHealing 5
                        [:Resistant "Metabolic Hazards"] 10
                        [:Teeth "Sharp"] 1
-                       [:SocialStigma "Savage"] -10
+                       :SocialStigmaSavage -10
                        [:Appearance "Ugly"] -8
                        [:Language "Goblin"] 6
                        [:CulturalFamiliarity "Goblin"] 1}
@@ -167,7 +167,7 @@
                              [:CurrentAffairs "Home town"] 1}
                    :optional-CP [[{:DX 20}
                                   {:IQ 20}]
-                                 [{[:ContactGroup "Relevant Crafts Guild"] 5}
+                                 [{[:Contact "Relevant Crafts Guild"] 5}
                                   {:SignatureGear 5}
                                   {:Per 5}
                                   {:HighManualDexterity 5}]
@@ -241,7 +241,7 @@
                       :WeatherSense 1
                       :Farming 1
                       :AnimalHandling 2}
-            :optional-CP [[{[:ContactGroup "Extended Family"] 5}
+            :optional-CP [[{[:Contact "Extended Family"] 5}
                            {:AnimalEmpathy 5}
                            {:Fit 5}
                            {:SignatureGear 5}
@@ -306,7 +306,7 @@
                            :Survival 1
                            :Naturalist 1
                            :Tracking 1
-                           :Orienteering 1
+                           [:Navigation "Land"] 1
                            :Hiking 1
                            [:AreaKnowledge "sizeable wilderness"] 1
                            :Knife 1
@@ -390,7 +390,7 @@
 (def lens-veteran {:name "Veteran"
                    :used-CP {[:Savoir-Faire "Military"] 2
                              :Scrounging 2
-                             [:ContactGroup "Old Teammates"] 2}
+                             [:Contact "Old Teammates"] 2}
                    :notes ["Distribute 4 CP among weapn skills you know"]})
 
 (def lens-combat-engineer {:name "Combat Engineer"
@@ -417,8 +417,8 @@
                              {:ST 10
                               :MaxHP 2
                               :MaxFP 3}]
-                            [{:Duty -5
-                              :MilitaryRank 0}
+                            [{:Duty -10
+                              :Rank 5}
                              {:Bloodlust -5}
                              {:Post-CombatShakes -5}
                              {:Wounded -5}
@@ -482,7 +482,7 @@
                            {:NightVision 3
                             :AcuteHearing 2
                             :Per 5}
-                           {:ContactGroup 10}
+                           {[:Contact "A group"] 10}
                            {:CombatReflexes 15
                             :LightSleeper -5}]
                           [{[:Enemy "Past Victims"] -10}
@@ -516,7 +516,7 @@
                             :Cooking 1}})
 
 (def lens-scout {:name "Scout"
-                 :used-CP {:Orienteering 2
+                 :used-CP {[:Navigation "Land"] 2
                            :Cartography 2
                            :Camouflage 2
                            :Interrogation 2
@@ -524,7 +524,7 @@
                            [:Savoir-Faire "Military"] 1}})
 
 (def lens-guide {:name "Guide"
-                 :used-CP {:Orienteering 2
+                 :used-CP {[:Navigation "Land"] 2
                            :Leadership 2
                            :Diplomacy 2
                            :Tactics 1
@@ -545,10 +545,10 @@
                        :Hiking 2
                        :Survival 1
                        :Tracking 2
-                       :Orienteering 1
+                       [:Navigation "Land"] 1
                        :AreaKnowledge 1
                        :Bow 2
-                       :Axe 1
+                       :AxeMace 1
                        [:Mimicry "animal & bird noises"] 1}
              :optional-CP [[{:DX 20}
                             {:IQ 20}

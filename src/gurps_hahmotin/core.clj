@@ -7,6 +7,7 @@
 
 (def skills-xml (xml/parse "resources/Basic Set.skl"))
 (def advantages-xml (xml/parse "resources/Basic Set.adq"))
+(def extra-advantages-xml (xml/parse "resources/Extra.adq"))
 
 (defn xml->map [tags updater xml-element]
   (->> (:content xml-element)
@@ -54,6 +55,7 @@
                  (skills->map)))
 
 (def advantages (->> (:content advantages-xml)
+                     (into (:content extra-advantages-xml))
                      (map xml->advantage)
                      (skills->map)))
 

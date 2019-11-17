@@ -6,6 +6,7 @@
             [selmer.parser :as selmer]))
 
 (def skills-xml (xml/parse "resources/Basic Set.skl"))
+(def advantages-xml (xml/parse "resources/Basic Set.adq"))
 
 (defn xml->map [tags updater xml-element]
   (->> (:content xml-element)
@@ -36,9 +37,25 @@
         (assoc :modifier (get difficulties difficulty))
         (update :default merge))))
 
+(defn xml->advantage [advantage-xml]
+  (xml->map #{:name} first-updater advantage-xml))
+
+(defn skills->map [skills]
+  (reduce #(assoc %1 (keyword (-> (:name %2)
+                                  (str/replace #"[ ()\[\]{},;/#]" "")
+                                  (str/replace #"@.+@" "")
+                                  (str/replace #"@" "")))
+                  %2)
+          {}
+          skills))
+
 (def skills (->> (:content skills-xml)
                  (map xml->skill)
-                 (reduce #(assoc %1 (keyword (str/replace (:name %2) #"[ ()\[\]{},/#]" "")) %2) {})))
+                 (skills->map)))
+
+(def advantages (->> (:content advantages-xml)
+                     (map xml->advantage)
+                     (skills->map)))
 
 ;;; Character
 
@@ -150,46 +167,85 @@
 
 (defmethod get-value :default [character skill-name]
   (let [points (get character skill-name 0)
-        skill (skill-name skills)]
-    (if (= points 0)
+        skill-index (if (vector? skill-name)
+                      (first skill-name)
+                      skill-name)
+        skill (get skills skill-index)]
+    (if (nil? skill)
       0 ; FIXME
-      (+ (get-value character (:base skill))
-         (:modifier skill)
-         (scale-points points)))))
+      (if (= points 0)
+        0 ; FIXME
+        (+ (get-value character (:base skill))
+           (:modifier skill)
+           (scale-points points))))))
 
 (def sheet-file "resources/character-sheet/character_form_v3.2.html")
 
 (def sheet (slurp sheet-file))
 
-(def required-values #{:Per :Will
+(def required-values #{:ST :DX :IQ :HT
+                       :Per :Will
                        :MaxHP :MaxFP :MaxHP3 :MaxFP3
                        :Initiative :Speed
                        :BM :Lift
                        :Swing
                        :Thrust})
 
+(defn render-simple-name [skill-name & [ref-name]]
+  (let [rendered-name (cond
+                        (not (nil? ref-name)) ref-name
+                        (contains? skills skill-name) (:name (get skills skill-name))
+                        (contains? advantages skill-name) (:name (get advantages skill-name))
+                        :else (name skill-name))]
+    (str/replace rendered-name #" *\(@.+@\)" "")))
+
+(defn render-name [skill-name & [ref-name]]
+  (if (vector? skill-name)
+    (str/join " " (cons (name (render-simple-name (first skill-name) ref-name))
+                        (map #(str "(" % ")") (rest skill-name))))
+    (render-simple-name skill-name ref-name)))
+
 (defn add-cp-to-context-map [character context-map kw]
   (let [used-CP (:used-CP character)
         value (get-value used-CP kw)
-        context-map' (-> context-map
-                         (assoc kw value)
-                         (assoc (keyword (str (name kw) "CP")) (kw used-CP)))
-        skill-count (:skill-count context-map)]
-    (if (contains? skills kw)
-      (-> context-map'
-          (update :skill-count inc)
-          (assoc-in [:skills skill-count] (-> (kw skills)
-                                              (assoc :value value)
-                                              (assoc :CP (kw used-CP)))))
-      context-map')))
-      
+        skill-count (:skill-count context-map)
+        advantage-count (:advantage-count context-map)
+        skill-index (if (vector? kw)
+                      (first kw)
+                      kw)]
+    (as-> context-map cm
+      (assoc cm kw value)
+      (assoc cm (keyword (str (render-name kw) "CP")) (get used-CP kw))
+      (cond
+        (contains? skills skill-index)
+        (-> cm
+            (update :skill-count inc)
+            (assoc-in [:skills skill-count] (as-> (skill-index skills) v
+                                              (assoc v :value value)
+                                              (assoc v :CP (get used-CP kw))
+                                              (assoc v :base (render-name (:base v)))
+                                              (assoc v :name (render-name kw (:name v))))))
+        
+        (contains? advantages skill-index)
+        (-> cm
+            (update :advantage-count inc)
+            (assoc-in [:advantages advantage-count] (as-> (skill-index advantages) v
+                                                      (assoc v :CP (get used-CP kw))
+                                                      (assoc v :name (render-name kw (:name v))))))
+        (contains? required-values skill-index) cm
+        :else (do
+                (println "Unknown property:" skill-index)
+                cm)))))
+            
+
 (defn create-context-map [character]
   (->> (clojure.set/union (->> character :used-CP keys set) required-values)
        (vec)
-       (sort)
+       (sort #(compare (render-name %1) (render-name %2)))
        (reduce (partial add-cp-to-context-map character)
                {:css "resources/character-sheet/character_form_v3.2.css"
                 :skill-count 0
+                :advantage-count 0
                 :TotalCP (apply + (vals (:used-CP character)))
                 :UnusedCP (apply - 150 (vals (:used-CP character)))})))
 

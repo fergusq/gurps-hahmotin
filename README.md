@@ -10,6 +10,10 @@ If you have Leiningen installed, you can generate a character sheet interactivel
 
 This will ask you to choose several alternatives and then saves the resulting character sheet to `sheet.html` file.
 
+It is also possible to generate a random character:
+
+	lein run sheet.html --random
+
 ## License
 
 ### Gurps-Hahmotin

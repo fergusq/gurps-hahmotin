@@ -8,6 +8,7 @@
 (def skills-xml (xml/parse "resources/Basic Set.skl"))
 (def advantages-xml (xml/parse "resources/Basic Set.adq"))
 (def extra-advantages-xml (xml/parse "resources/Extra.adq"))
+(def spells-xml (xml/parse "resources/Magic.spl"))
 
 (defn xml->map [tags updater xml-element]
   (->> (:content xml-element)
@@ -38,8 +39,29 @@
         (assoc :modifier (get difficulties difficulty))
         (update :default merge))))
 
+(defn xml->spell [spell-xml]
+  (let [spell (xml->map #{:name :spell_class
+                          :casting_cost :maintanance_cost
+                          :casting_time :duration
+                          :reference} first-updater spell-xml)]
+    {:name (:name spell)
+     :casting-cost (:casting_cost spell)
+     :maintanance-cost (:maintanance_cost spell)
+     :duration (:duration spell)
+     :reference (:reference spell)
+     :difficulty "H"
+     :modifier (get difficulties "H") ; FIXME
+     :base :SpellAttribute}))
+
 (defn xml->advantage [advantage-xml]
-  (xml->map #{:name} first-updater advantage-xml))
+  (let [adv (xml->map #{:name :base_points :points_per_level} first-updater advantage-xml)]
+    (as-> {:name (:name adv)} v
+      (if (:base_points adv)
+        (assoc v :base-points (Integer. (:base_points adv)))
+        v)
+      (if (:points_per_level adv)
+        (assoc v :points-per-level (Integer. (:points_per_level adv)))
+        v))))
 
 (defn skills->map [skills]
   (reduce #(assoc %1 (keyword (-> (:name %2)
@@ -59,6 +81,10 @@
                      (map xml->advantage)
                      (skills->map)))
 
+(def spells (->> (:content spells-xml)
+                 (map xml->spell)
+                 (skills->map)))
+
 ;;; Character
 
 (defn scale-points [points]
@@ -72,20 +98,13 @@
     1 1
     0))
 
-; FIXME
-(defn round [f]
-  (let [i (int (Math/floor f))]
-    (if (< i 0)
-      (inc i)
-      i)))
-
 (declare get-value)
 
 (defn scale [character default attr cost]
   (let [def (if (keyword? default)
               (get-value character default)
               default)]
-    (+ (round def) (quot (get character attr 0)
+    (+ (long def) (quot (get character attr 0)
                          cost))))
 
 (defmulti get-value (fn [_ id] id))
@@ -136,10 +155,10 @@
   (scale c :Speed :BM 5))
 
 (defmethod get-value :Lift [c _]
-  (let [liftingST (+ (get-value c :ST) (round (/ (get c :Lift 0)
-                                                 3)))]
-    (round (/ (* liftingST liftingST)
-              5))))
+  (let [liftingST (+ (get-value c :ST) (quot (get c :Lift 0)
+                                             3))]
+    (quot (* liftingST liftingST)
+          5)))
 
 (defmethod get-value :Thrust [c _]
   (let [ST (get-value c :ST)]
@@ -167,19 +186,41 @@
       8 "1d-2"
       "1d-3")))
 
+; FIXME: Does not work for characters who are both mages and clerics
+(defmethod get-value :SpellAttribute [c _]
+  (+ (get-value c :Magery)
+     (get-value c :PowerInvestiture)))
+
+(declare get-skill-value)
+(declare get-advantage-value)
+
 (defmethod get-value :default [character skill-name]
   (let [points (get character skill-name 0)
         skill-index (if (vector? skill-name)
                       (first skill-name)
                       skill-name)
-        skill (get skills skill-index)]
-    (if (nil? skill)
-      0 ; FIXME
-      (if (= points 0)
-        0 ; FIXME
-        (+ (get-value character (:base skill))
-           (:modifier skill)
-           (scale-points points))))))
+        skill (get skills skill-index)
+        adv (get advantages skill-index)]
+    (cond
+      (= points 0) 0
+      skill (get-skill-value character skill points)
+      adv (get-advantage-value character adv points)
+      :else 0)))
+
+(defn get-skill-value [character skill points]
+  (+ (get-value character (:base skill))
+     (:modifier skill)
+     (scale-points points)))
+
+(defn get-advantage-value [characters adv points]
+  (let [base-points (or (:base-points adv) 0)
+        points-per-level (or (:points-per-level adv) 9999)
+        level (quot (- points base-points)
+                    points-per-level)]
+    (if (< (Math/abs points) (Math/abs base-points))
+      nil
+      level)))
+
 
 (def sheet-file "resources/character-sheet/character_form_v3.2.html")
 
@@ -212,6 +253,7 @@
         value (get-value used-CP kw)
         skill-count (:skill-count context-map)
         advantage-count (:advantage-count context-map)
+        lang-count (:lang-count context-map)
         skill-index (if (vector? kw)
                       (first kw)
                       kw)]
@@ -219,6 +261,11 @@
       (assoc cm kw value)
       (assoc cm (keyword (str (render-name kw) "CP")) (get used-CP kw))
       (cond
+        (= skill-index :Language)
+        (-> cm
+            (update :lang-count inc)
+            (assoc-in [:languages lang-count] {:name (get kw 1)
+                                               :CP (get used-CP kw)}))
         (contains? skills skill-index)
         (-> cm
             (update :skill-count inc)
@@ -246,8 +293,12 @@
        (sort #(compare (render-name %1) (render-name %2)))
        (reduce (partial add-cp-to-context-map character)
                {:css "resources/character-sheet/character_form_v3.2.css"
+                :species (:species character)
+                :background (:background character)
+                :profession (:profession character)
                 :skill-count 0
                 :advantage-count 0
+                :lang-count 0
                 :TotalCP (apply + (vals (:used-CP character)))
                 :UnusedCP (apply - 150 (vals (:used-CP character)))})))
 

@@ -40,9 +40,11 @@
        (into [])
        (sort #(compare (str %1) (str %2)))))
 
-(def human {:name "Human"})
+(def human {:name "Human"
+            :species "Human"})
 
 (def dwarf {:name "Dwarf"
+            :species "Dwarf"
             :used-CP {:HT 10
                       :Will 5
                       :BM -5
@@ -52,6 +54,7 @@
                       :AlcoholTolerance 1}})
 
 (def elf {:name "Elf"
+          :species "Elf"
           :used-CP {:ST -10
                     :DX 20
                     :Per 5
@@ -62,6 +65,7 @@
                     [:Appearance "Attractive"] 4}})
 
 (def half-elf {:name "Half-Elf"
+               :species "Half-Elf"
                :used-CP {:ST -10
                          :DX 20
                          :Per 5
@@ -70,6 +74,7 @@
                          :DistinctiveFeatures -1}})
 
 (def halfling {:name "Halfling"
+               :species "Halfling"
                :used-CP {:ST -30
                          :DX 20
                          :HT 10
@@ -80,6 +85,7 @@
                          :HardtoKill 8}})
 
 (def half-orc {:name "Half-Orc"
+               :species "Half-Orc"
                :used-CP {:ST 20
                          :IQ -20
                          :HT 10
@@ -94,6 +100,7 @@
                                [:Appearance "Unattractive"] -4}]]})
 
 (def ogreblood {:name "Ogreblood"
+                :species "Ogreblood"
                 :used-CP {:ST 40
                           :IQ -20
                           :HT 10
@@ -104,6 +111,7 @@
                           [:Appearance "Ugly"] -8}})
 
 (def goblin {:name "Goblin"
+             :species "Goblin"
              :used-CP {:IQ -20
                        :HT 10
                        :Per 5
@@ -131,6 +139,7 @@
               :Goblin goblin})
 
 (def nobility {:name "Nobility"
+               :background "Nobility"
                :used-CP {:IQ 20
                          :ST -10
                          [:Wealth "Comfortable"] 10
@@ -157,6 +166,7 @@
                               {:Hobby 1}]]})
 
 (def tradesperson {:name "Tradesperson"
+                   :background "Tradesperson"
                    :used-CP {:Stealth 1
                              :Streetwise 1
                              :Fast-Talk 1
@@ -193,6 +203,7 @@
                                   {:Engineer 4}]]})
 
 (def street-rat {:name "Street Rat"
+                 :background "Street Rat"
                  :used-CP {:Stealth 1
                            :Acrobatics 1
                            :Climbing 1
@@ -233,6 +244,7 @@
                                                    :Performance])]})
 
 (def rural {:name "Rural"
+            :background "Rural"
             :used-CP {:Stealth 1
                       :Climbing 1
                       :Swimming 1
@@ -284,9 +296,12 @@
                           :Broadsword 1
                           :Shield 1
                           :Riding 1
-                          :AnimalHandling 1}})
+                          :AnimalHandling 1}
+                :optional {:background ["Barbarian Clan"
+                                        "Orc Clan"]}})
 
 (def lens-elf-groove {:name "Elf Groove"
+                      :background "Elf Groove"
                       :used-CP {:Per 5
                                 [:Language "Elvish"] 6
                                 [:CulturalFamiliarity "Elvish"] 1
@@ -298,6 +313,7 @@
                                 :MusicalInstrument 1}})
 
 (def wilderness {:name "Wilderness"
+                 :background "Wilderness"
                  :used-CP {:DX 20
                            :Stealth 2
                            :Climbing 1
@@ -330,6 +346,7 @@
                  :lens [lens-clan lens-elf-groove]})
                                  
 (def dwarf-clan {:name "Dwarf Clan"
+                 :background "Dwarf Clan"
                  :used-CP {:Will 5
                            [:CulturalFamiliarity "Dwarven"] 1
                            [:Language "Dwarven"] 1
@@ -374,6 +391,7 @@
                   :DwarfClan dwarf-clan})
 
 (def lens-cavalry {:name "Cavalry"
+                   :profession "Cavalry"
                    :used-CP {[:Riding "Equines"] 4
                              :Spear 1
                              :AnimalHandling 2
@@ -381,6 +399,7 @@
                              :Tactics 2}})
 
 (def lens-officer {:name "Officer"
+                   :profession "Officer"
                    :used-CP {:Tactics 2
                              :Leadership 2
                              :Administration 2
@@ -388,12 +407,14 @@
                              :Intimidate 1}})
 
 (def lens-veteran {:name "Veteran"
+                   :profession "Veteran"
                    :used-CP {[:Savoir-Faire "Military"] 2
                              :Scrounging 2
                              [:Contact "Old Teammates"] 2}
                    :notes ["Distribute 4 CP among weapn skills you know"]})
 
 (def lens-combat-engineer {:name "Combat Engineer"
+                           :profession "Combat Engineer"
                            :used-CP {[:Engineer "Combat"] 2
                                      :ForcedEntry 2
                                      :Explosives 2
@@ -402,6 +423,7 @@
                                      :Traps 2}})
 
 (def soldier {:name "Soldier"
+              :profession "Soldier"
               :used-CP {:ST 10
                         :Broadsword 2
                         :Shield 2
@@ -439,6 +461,7 @@
               :lens [lens-cavalry lens-officer lens-veteran lens-combat-engineer]})
 
 (def lens-conman {:name "Conman"
+                  :profession "Conman"
                   :used-CP {:Acting 2
                             :Fast-Talk 4
                             :Forgery 1
@@ -446,12 +469,14 @@
                             :Disguise 2}})
 
 (def lens-assassin {:name "Assassin"
+                    :profession "Assassin"
                     :used-CP {:Poisons 2
                               :Stealth 3
                               :HerbLore 1}
                     :notes ["Add 4 CP to one weapon skill"]})
 
 (def lens-burglar {:name "Burglar"
+                   :profession "Burglar"
                    :used-CP {:Climbing 2
                              :Lockpicking 2
                              :ForcedEntry 4
@@ -459,6 +484,7 @@
                              :Jumping 1}})
 
 (def lens-fingers {:name "Fingers"
+                   :profession "Fingers"
                    :used-CP {:Pickpocket 2
                              :SleightofHand 4
                              :Holdout 1
@@ -466,6 +492,7 @@
                              :Fast-Talk 1}})
 
 (def thief {:name "Thief"
+            :profession "Thief"
             :used-CP {:Stealth 1
                       :Acrobatics 1
                       :Climbing 1
@@ -508,6 +535,7 @@
             :lens [lens-conman lens-assassin lens-burglar lens-fingers]})
 
 (def lens-hunter {:name "Hunter"
+                  :profession "Hunter"
                   :used-CP {:Traps 2
                             :Bow 2
                             :Tracking 2
@@ -516,6 +544,7 @@
                             :Cooking 1}})
 
 (def lens-scout {:name "Scout"
+                 :profession "Scout"
                  :used-CP {[:Navigation "Land"] 2
                            :Cartography 2
                            :Camouflage 2
@@ -524,6 +553,7 @@
                            [:Savoir-Faire "Military"] 1}})
 
 (def lens-guide {:name "Guide"
+                 :profession "Guide"
                  :used-CP {[:Navigation "Land"] 2
                            :Leadership 2
                            :Diplomacy 2
@@ -532,6 +562,7 @@
                            :Administration 1}})
 
 (def lens-brigand {:name "Brigand"
+                   :profession "Brigand"
                    :used-CP {:Tactics 2
                              :Staff 2
                              :Bow 2
@@ -540,6 +571,7 @@
                              :Disguise 1}})
 
 (def ranger {:name "Ranger"
+             :profession "Ranger"
              :used-CP {:Stealth 2
                        :FirstAid 1
                        :Hiking 2
@@ -571,7 +603,106 @@
                                                         :Net
                                                         :Naturalist})]
              :lens [lens-hunter lens-scout lens-guide lens-brigand]})
-                            
+
+(def mage {:name "Mage"
+           :profession "Mage"
+           :used-CP {:Magery 15
+                     :IQ 20
+                     :Thaumatology 2
+                     :Research 1
+                     [:CurrentAffairs "Learned"] 1
+                     [:AreaKnowledge "The Capital"] 1}
+           :optional-CP [[{:Magery 10}
+                          {:MaxFP 9
+                           [:Perk "Mana Trance"] 1}
+                          {:IQ 20
+                           :ST -10}]
+                         [{:Clueless -10}
+                          {:Duty -10}
+                          {:LowPainThreshold -10}
+                          {:Pyromania -10}
+                          {:Impulsiveness -10}
+                          {:Overconfidence -10}
+                          {}]
+                         (allocate-points 2 [:Throwing
+                                             :Staff
+                                             :InnateAttack])
+                         (allocate-points 3 [:Diplomacy
+                                             [:Savoir-Faire "High Society"]
+                                             [:History "Kingdom"]
+                                             :Cartography
+                                             :Linguistics
+                                             [:RitualMagic "Elementalism"]
+                                             [:HiddenLore "Nature Spirits"]
+                                             [:HiddenLore "Demons"]])
+                         (allocate-same-to-each 1 5 #{:DetectMagic
+                                                      :IgniteFire
+                                                      :PurifyAir
+                                                      :SeekWater
+                                                      :SeekEarth
+                                                      :Block
+                                                      :Counterspell
+                                                      :Scryguard
+                                                      :Apportation
+                                                      :Sound})]
+           :notes ["Select one [3 CP] from: Powerstone with capacity 3, Book with 10 spells, Three spells"]})
+
+(def lens-healer {:name "Healer"
+                  :profession "Healer"
+                  :used-CP {:Surgery 2
+                            :HerbLore 2
+                            :StopBleeding 1
+                            :MinorHealing 2
+                            :MajorHealing 2
+                            :Restoration 1}})
+
+(def lens-inquisitor {:name "Inquisitor"
+                      :profession "Inquisitor"
+                      :used-CP {:DetectLies 2
+                                :Interrogation 2
+                                :Intimidation 1
+                                [:HiddenLore "Demons"] 1
+                                :Search 2
+                                :SenseSpirit 1
+                                :SenseHeretics 1}})
+
+(def lens-holy-warrior {:name "Holy Warrior"
+                        :profession "Holy Warrior"
+                        :used-CP {[:Riding "Equines"] 1
+                                  :Tactics 1
+                                  :Broadsword 3
+                                  :Shield 1
+                                  :Flash 2
+                                  :Sunbolt 1
+                                  :ContinualLight 1}})
+
+(def lens-exorcist {:name "Exorcist"
+                    :profession "Exorcist"
+                    :used-CP {:Exorcism 2
+                              :FinalRest 1
+                              :SenseSpirit 1
+                              :TurnSpirit 2
+                              :TurnZombie 2
+                              :RepelSpirits 1
+                              :Consecrate 1}})
+
+(def sun-templar {:name "Sun Templar"
+                  :profession "Sun Templar"
+                  :used-CP {[:ClericalInvestment "Sun Templars"] 5
+                            :PowerInvestiture 10
+                            :IQ 20
+                            [:Oath "Sun Templars"] -10
+                            :FirstAid 2
+                            :Hiking 1
+                            :Shield 1
+                            :Broadsword 1
+                            [:ReligiousRitual "Sun God"] 1
+                            :Heraldry 1
+                            [:Riding "Equines"] 1
+                            :PublicSpeaking 1}
+                  :notes ["Select 3 different spells randomly with 2d: 1-3 Awaken, 4-5 Sense Sun, 6, Warmth, 7 Light, 8 Stop Bleeding, 9 Bright Vision, 10 Final Rest, 11-12 SenseSpirit"
+                          "Select 3 spells from Sun Templar Spells"]
+                  :lens [lens-healer lens-inquisitor lens-holy-warrior lens-exorcist]})
 
 (def professions {:Soldier soldier
                   :Thief thief
